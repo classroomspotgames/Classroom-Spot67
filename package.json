@@ -1,0 +1,21 @@
+{
+  "name": "macos-theme-site",
+  "version": "1.0.0",
+  "description": "Mac OS themed website with a Node static server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "macos",
+    "theme",
+    "website"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@mercuryworkshop/bare-as-module3": "^2.2.5",
+    "@titaniumnetwork-dev/ultraviolet": "^3.2.10",
+    "@tomphttp/bare-server-node": "^2.0.6"
+  }
+}
