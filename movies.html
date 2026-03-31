@@ -6,584 +6,149 @@
   <title>ClassroomSpot TV</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --red: #E50914;
-      --bg: #141414;
-      --card-bg: #2F2F2F;
-      --text: #FFFFFF;
-      --muted: #808080;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+    :root { --red:#E50914; --bg:#141414; --card:#2F2F2F; --txt:#FFFFFF; --muted:#808080; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden;}
 
-    #introScreen {
-      position: fixed;
-      inset: 0;
-      background: #000;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: opacity 0.8s ease;
-    }
-    #introScreen.fade-out { opacity: 0; pointer-events: none; }
-    #introGif { width: 100%; height: 100%; object-fit: cover; }
+    #introScreen{position:fixed;inset:0;background:#000;z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity .8s ease;}
+    #introScreen.fade-out{opacity:0;pointer-events:none;}
+    #introGif{width:100%;height:100%;object-fit:cover;}
 
-    #profileScreen {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 9998;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 48px;
-    }
-    #profileScreen.visible { display: flex; }
-    #profileScreen.fade-out { opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
+    #profileScreen{position:fixed;inset:0;background:var(--bg);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;gap:48px;}
+    #profileScreen.visible{display:flex;}
+    #profileScreen.fade-out{opacity:0;transition:opacity .5s ease;pointer-events:none;}
+    .profile-title{font-size:3.5rem;font-weight:400;letter-spacing:2px;}
+    .profiles-grid{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;}
+    .profile-item{display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;transition:transform .2s;}
+    .profile-item:hover{transform:scale(1.08);}
+    .profile-item:hover .profile-avatar{border-color:var(--txt);}
+    .profile-item:hover .profile-name{color:var(--txt);}
+    .profile-avatar{width:130px;height:130px;border-radius:6px;border:3px solid transparent;overflow:hidden;transition:border-color .2s;}
+    .profile-avatar img{width:100%;height:100%;object-fit:cover;}
+    .profile-name{font-size:1rem;color:var(--muted);font-weight:500;transition:color .2s;}
+    .manage-btn{padding:10px 32px;border:1px solid var(--muted);background:transparent;color:var(--muted);font-size:1rem;font-family:'Inter',sans-serif;letter-spacing:1px;cursor:pointer;transition:border-color .2s,color .2s;}
+    .manage-btn:hover{border-color:var(--txt);color:var(--txt);}
 
-    .profile-title {
-      font-size: 3.5rem;
-      font-weight: 400;
-      color: var(--text);
-      letter-spacing: 2px;
-    }
+    #navbar{position:fixed;top:0;left:0;right:0;height:68px;display:flex;align-items:center;padding:0 60px;z-index:200;background:linear-gradient(to bottom,rgba(0,0,0,.9) 0%,transparent 100%);transition:background .3s;gap:32px;}
+    #navbar.scrolled{background:#141414;}
+    .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--red);letter-spacing:3px;text-decoration:none;flex-shrink:0;}
+    .nav-links{display:flex;gap:20px;list-style:none;}
+    .nav-links a{color:rgba(255,255,255,.8);text-decoration:none;font-size:.85rem;font-weight:500;transition:color .2s;}
+    .nav-links a:hover{color:#fff;}
+    .nav-right{margin-left:auto;display:flex;align-items:center;gap:20px;}
+    .search-container{display:flex;align-items:center;position:relative;}
+    #searchToggle{background:none;border:none;color:#fff;cursor:pointer;padding:4px;display:flex;align-items:center;z-index:2;}
+    #searchToggle svg{width:20px;height:20px;fill:#fff;}
+    #navSearch{position:absolute;right:32px;width:0;overflow:hidden;background:rgba(0,0,0,.9);border:1px solid transparent;color:#fff;padding:6px 0;font-size:.9rem;outline:none;font-family:'Inter',sans-serif;transition:width .3s ease,padding .3s ease,border-color .3s ease;white-space:nowrap;}
+    #navSearch.open{width:220px;padding:6px 12px;border-color:rgba(255,255,255,.5);}
+    #navSearch::placeholder{color:rgba(255,255,255,.4);}
+    .nav-pfp{width:34px;height:34px;border-radius:4px;overflow:hidden;cursor:pointer;flex-shrink:0;}
+    .nav-pfp img{width:100%;height:100%;object-fit:cover;}
 
-    .profiles-grid { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; }
+    #hero{position:relative;width:100%;height:80vh;min-height:500px;display:flex;align-items:flex-end;padding:0 60px 80px;overflow:hidden;}
+    #heroBg{position:absolute;inset:0;background-size:cover;background-position:center top;background-repeat:no-repeat;transition:background-image .8s ease;}
+    #heroBg::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,#141414 0%,transparent 50%),linear-gradient(to right,rgba(0,0,0,.8) 0%,transparent 60%);}
+    .hero-content{position:relative;z-index:2;max-width:500px;}
+    .hero-badge{font-size:.75rem;font-weight:700;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:8px;}
+    .hero-title{font-size:3.5rem;font-weight:700;line-height:1.05;margin-bottom:16px;text-shadow:2px 2px 8px rgba(0,0,0,.5);}
+    .hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:.9rem;color:rgba(255,255,255,.8);}
+    .hero-rating-badge{border:1px solid rgba(255,255,255,.5);padding:2px 8px;font-size:.8rem;}
+    .hero-overview{font-size:.95rem;line-height:1.5;color:rgba(255,255,255,.85);margin-bottom:24px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+    .hero-buttons{display:flex;gap:12px;}
+    .btn-play{display:flex;align-items:center;gap:8px;padding:12px 28px;background:#fff;color:#000;border:none;border-radius:4px;font-size:1rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
+    .btn-play:hover{background:rgba(255,255,255,.75);}
+    .btn-play svg{width:20px;height:20px;fill:#000;}
+    .btn-info{display:flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(109,109,110,.7);color:#fff;border:none;border-radius:4px;font-size:1rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
+    .btn-info:hover{background:rgba(109,109,110,.5);}
+    .btn-info svg{width:20px;height:20px;fill:#fff;}
 
-    .profile-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .profile-item:hover { transform: scale(1.08); }
-    .profile-item:hover .profile-avatar { border-color: var(--text); }
-    .profile-item:hover .profile-name { color: var(--text); }
+    #content{position:relative;z-index:10;margin-top:-40px;padding:0 0 80px;}
 
-    .profile-avatar {
-      width: 130px;
-      height: 130px;
-      border-radius: 6px;
-      border: 3px solid transparent;
-      overflow: hidden;
-      transition: border-color 0.2s;
-    }
-    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    #searchResults{display:none;padding:80px 60px 40px;}
+    #searchResults .row-title{font-size:1.4rem;font-weight:700;margin-bottom:20px;}
+    #searchGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
 
-    .profile-name {
-      font-size: 1rem;
-      color: var(--muted);
-      font-weight: 500;
-      text-align: center;
-      transition: color 0.2s;
-    }
+    .row{margin-bottom:48px;padding:0 60px;position:relative;}
+    .row-title{font-size:1.2rem;font-weight:700;margin-bottom:12px;letter-spacing:.5px;}
+    .row-track{display:flex;gap:6px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;padding-bottom:8px;align-items:flex-end;}
+    .row-track::-webkit-scrollbar{display:none;}
 
-    .manage-btn {
-      padding: 10px 32px;
-      border: 1px solid var(--muted);
-      background: transparent;
-      color: var(--muted);
-      font-size: 1rem;
-      font-family: 'Inter', sans-serif;
-      letter-spacing: 1px;
-      cursor: pointer;
-      transition: border-color 0.2s, color 0.2s;
-    }
-    .manage-btn:hover { border-color: var(--text); color: var(--text); }
+    .thumb-wrap{flex:0 0 auto;position:relative;}
+    .thumb-wrap:hover{z-index:50;}
 
-    #navbar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: 68px;
-      display: flex;
-      align-items: center;
-      padding: 0 60px;
-      z-index: 100;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 100%);
-      transition: background 0.3s;
-      gap: 32px;
-    }
-    #navbar.scrolled { background: #141414; }
+    .thumb-card{width:180px;border-radius:4px;overflow:hidden;background:var(--card);cursor:pointer;position:relative;}
+    .thumb-card img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;}
 
-    .nav-logo {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 2rem;
-      color: var(--red);
-      letter-spacing: 3px;
-      text-decoration: none;
-      flex-shrink: 0;
+    .hover-expand{
+      position:absolute;
+      bottom:calc(100% + 8px);
+      left:50%;
+      transform:translateX(-50%) scale(.88);
+      width:320px;
+      background:#181818;
+      border-radius:8px;
+      box-shadow:0 20px 60px rgba(0,0,0,.95);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .25s ease,transform .25s ease;
+      z-index:300;
+      overflow:hidden;
     }
+    .thumb-wrap:hover .hover-expand{opacity:1;transform:translateX(-50%) scale(1);pointer-events:auto;}
 
-    .nav-links { display: flex; gap: 20px; list-style: none; }
-    .nav-links a {
-      color: rgba(255,255,255,0.8);
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: #fff; }
+    .trailer-zone{width:100%;height:180px;background:#000;position:relative;overflow:hidden;flex-shrink:0;}
+    .trailer-zone img.t-thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .trailer-zone .t-loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.7);font-size:.78rem;color:#777;letter-spacing:1px;}
+    .trailer-zone iframe{position:absolute;inset:0;width:100%;height:100%;border:none;}
 
-    .nav-right {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+    .expand-body{padding:12px 14px 14px;}
+    .expand-title{font-size:.95rem;font-weight:700;margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .expand-btns{display:flex;gap:8px;align-items:center;margin-bottom:12px;}
+    .exp-btn-play{width:34px;height:34px;background:#fff;color:#000;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s;}
+    .exp-btn-play:hover{background:rgba(255,255,255,.8);}
+    .exp-btn-play svg{width:14px;height:14px;fill:#000;margin-left:2px;}
+    .exp-btn-add{width:34px;height:34px;background:transparent;color:#fff;border:2px solid #aaa;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;transition:border-color .2s;}
+    .exp-btn-add:hover{border-color:#fff;}
+    .exp-match{margin-left:auto;color:#46d369;font-size:.82rem;font-weight:600;}
+    .exp-selects{display:flex;gap:6px;flex-wrap:wrap;}
+    .exp-selects select{background:#333;color:#fff;border:none;padding:6px 10px;border-radius:4px;font-size:.78rem;font-family:'Inter',sans-serif;cursor:pointer;outline:none;flex:1;min-width:0;}
+    .exp-selects select:hover{background:#444;}
+    .exp-watch-btn{width:100%;margin-top:8px;padding:8px;background:var(--red);color:#fff;border:none;border-radius:4px;font-size:.85rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
+    .exp-watch-btn:hover{background:#c40812;}
 
-    .search-container {
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
+    .ranked-wrap{flex:0 0 auto;position:relative;display:flex;align-items:flex-end;margin-left:20px;}
+    .ranked-wrap:first-child{margin-left:0;}
+    .rank-number{font-family:'Bebas Neue',sans-serif;font-size:160px;line-height:1;color:transparent;-webkit-text-stroke:6px #444;position:absolute;left:-55px;bottom:-10px;z-index:0;user-select:none;letter-spacing:-5px;filter:drop-shadow(2px 4px 0 #000) drop-shadow(4px 8px 0 rgba(0,0,0,.5));}
+    .ranked-card{position:relative;z-index:1;width:140px;border-radius:4px;overflow:hidden;cursor:pointer;background:var(--card);}
+    .ranked-card img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;}
+    .ranked-wrap .hover-expand{bottom:calc(100% + 8px);}
 
-    #searchToggle {
-      background: none;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      padding: 4px;
-      display: flex;
-      align-items: center;
-      transition: color 0.2s;
-      z-index: 2;
-    }
-    #searchToggle:hover { color: rgba(255,255,255,0.7); }
-    #searchToggle svg { width: 20px; height: 20px; fill: #fff; }
+    .skeleton-card{flex:0 0 auto;width:180px;aspect-ratio:2/3;background:#2a2a2a;border-radius:4px;animation:shimmer 1.5s infinite;}
+    @keyframes shimmer{0%,100%{opacity:.5}50%{opacity:1}}
 
-    #navSearch {
-      position: absolute;
-      right: 32px;
-      width: 0;
-      overflow: hidden;
-      background: rgba(0,0,0,0.9);
-      border: 1px solid transparent;
-      color: #fff;
-      padding: 6px 0;
-      font-size: 0.9rem;
-      outline: none;
-      font-family: 'Inter', sans-serif;
-      transition: width 0.3s ease, padding 0.3s ease, border-color 0.3s ease;
-      white-space: nowrap;
-    }
-    #navSearch.open {
-      width: 220px;
-      padding: 6px 12px;
-      border-color: rgba(255,255,255,0.5);
-    }
-    #navSearch::placeholder { color: rgba(255,255,255,0.4); }
+    #modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;}
+    #modal.active{display:flex;}
+    #modalContent{width:100%;max-width:900px;background:#181818;border-radius:8px;overflow:hidden;position:relative;max-height:90vh;overflow-y:auto;}
+    #modalHeader{position:relative;height:300px;overflow:hidden;background:#000;}
+    #modalHeaderBg{width:100%;height:100%;object-fit:cover;object-position:center top;}
+    #modalHeaderGrad{position:absolute;inset:0;background:linear-gradient(to top,#181818 0%,transparent 50%);}
+    #modalHeaderTitle{position:absolute;bottom:20px;left:24px;font-size:1.8rem;font-weight:700;}
+    #modalClose{position:absolute;top:12px;right:12px;width:36px;height:36px;background:#181818;border:none;border-radius:50%;color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+    #modalClose:hover{background:#333;}
+    #modalBody{padding:20px 24px 24px;display:flex;flex-direction:column;gap:16px;}
+    #modalRating{display:inline-block;border:1px solid rgba(255,255,255,.4);padding:3px 10px;font-size:.8rem;color:rgba(255,255,255,.7);}
+    .modal-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+    .modal-controls select{background:#333;color:#fff;border:none;padding:10px 16px;border-radius:4px;font-size:.9rem;font-family:'Inter',sans-serif;cursor:pointer;outline:none;}
+    .modal-controls select:hover{background:#444;}
+    .modal-watch-btn{padding:10px 24px;background:var(--red);color:#fff;border:none;border-radius:4px;font-size:.95rem;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .2s;}
+    .modal-watch-btn:hover{background:#c40812;}
+    #iframeWrap{width:100%;height:400px;background:#000;border-radius:4px;overflow:hidden;}
+    #modalIframe{width:100%;height:100%;border:none;}
 
-    .nav-pfp {
-      width: 34px;
-      height: 34px;
-      border-radius: 4px;
-      overflow: hidden;
-      cursor: pointer;
-      flex-shrink: 0;
-    }
-    .nav-pfp img { width: 100%; height: 100%; object-fit: cover; }
-
-    #hero {
-      position: relative;
-      width: 100%;
-      height: 80vh;
-      min-height: 500px;
-      display: flex;
-      align-items: flex-end;
-      padding: 0 60px 80px;
-      overflow: hidden;
-    }
-
-    #heroBg {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center top;
-      background-repeat: no-repeat;
-      transition: background-image 0.8s ease;
-    }
-    #heroBg::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(to top, #141414 0%, transparent 50%),
-        linear-gradient(to right, rgba(0,0,0,0.8) 0%, transparent 60%);
-    }
-
-    .hero-content { position: relative; z-index: 2; max-width: 500px; }
-    .hero-badge {
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: var(--red);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-    .hero-title {
-      font-size: 3.5rem;
-      font-weight: 700;
-      line-height: 1.05;
-      margin-bottom: 16px;
-      text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-    }
-    .hero-meta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.8);
-    }
-    .hero-rating-badge {
-      border: 1px solid rgba(255,255,255,0.5);
-      padding: 2px 8px;
-      font-size: 0.8rem;
-    }
-    .hero-overview {
-      font-size: 0.95rem;
-      line-height: 1.5;
-      color: rgba(255,255,255,0.85);
-      margin-bottom: 24px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .hero-buttons { display: flex; gap: 12px; }
-    .btn-play {
-      display: flex; align-items: center; gap: 8px;
-      padding: 12px 28px;
-      background: #fff; color: #000;
-      border: none; border-radius: 4px;
-      font-size: 1rem; font-weight: 700;
-      cursor: pointer; font-family: 'Inter', sans-serif;
-      transition: background 0.2s;
-    }
-    .btn-play:hover { background: rgba(255,255,255,0.75); }
-    .btn-play svg { width: 20px; height: 20px; fill: #000; }
-    .btn-info {
-      display: flex; align-items: center; gap: 8px;
-      padding: 12px 24px;
-      background: rgba(109,109,110,0.7); color: #fff;
-      border: none; border-radius: 4px;
-      font-size: 1rem; font-weight: 600;
-      cursor: pointer; font-family: 'Inter', sans-serif;
-      transition: background 0.2s;
-    }
-    .btn-info:hover { background: rgba(109,109,110,0.5); }
-    .btn-info svg { width: 20px; height: 20px; fill: #fff; }
-
-    #content { position: relative; z-index: 10; margin-top: -40px; padding: 0 0 80px; }
-
-    .row { margin-bottom: 48px; padding: 0 60px; position: relative; }
-    .row-title {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: var(--text);
-      letter-spacing: 0.5px;
-    }
-
-    .row-track {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      scroll-behavior: smooth;
-      scrollbar-width: none;
-      padding-bottom: 8px;
-      align-items: flex-end;
-    }
-    .row-track::-webkit-scrollbar { display: none; }
-
-    .thumb-wrap {
-      flex: 0 0 auto;
-      position: relative;
-      transition: transform 0.25s ease, z-index 0s;
-    }
-    .thumb-wrap:hover { z-index: 50; }
-
-    .thumb-card {
-      width: 180px;
-      border-radius: 4px;
-      overflow: hidden;
-      background: var(--card-bg);
-      cursor: pointer;
-      position: relative;
-    }
-    .thumb-card img {
-      width: 100%;
-      aspect-ratio: 2/3;
-      object-fit: cover;
-      display: block;
-    }
-
-    .hover-expand {
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%) scale(0.85);
-      width: 300px;
-      background: #181818;
-      border-radius: 8px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      z-index: 100;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    .thumb-wrap:hover .hover-expand {
-      opacity: 1;
-      transform: translateX(-50%) scale(1);
-      pointer-events: auto;
-    }
-
-    .trailer-frame {
-      width: 100%;
-      height: 168px;
-      background: #000;
-      position: relative;
-      overflow: hidden;
-    }
-    .trailer-frame iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-    .trailer-frame .trailer-thumb {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .trailer-loading {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #000;
-      color: #555;
-      font-size: 0.8rem;
-    }
-
-    .expand-info {
-      padding: 12px 14px 14px;
-    }
-    .expand-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .expand-btns {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-      align-items: center;
-    }
-    .expand-btn-play {
-      width: 36px; height: 36px;
-      background: #fff; color: #000;
-      border: none; border-radius: 50%;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; font-weight: 700;
-      flex-shrink: 0;
-      transition: background 0.2s;
-    }
-    .expand-btn-play:hover { background: rgba(255,255,255,0.8); }
-    .expand-btn-play svg { width: 16px; height: 16px; fill: #000; margin-left: 2px; }
-
-    .expand-btn-add {
-      width: 36px; height: 36px;
-      background: transparent; color: #fff;
-      border: 2px solid #aaa; border-radius: 50%;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; font-weight: 300;
-      flex-shrink: 0; transition: border-color 0.2s;
-    }
-    .expand-btn-add:hover { border-color: #fff; }
-
-    .expand-match { color: #46d369; font-size: 0.82rem; font-weight: 600; }
-    .expand-tags {
-      font-size: 0.75rem;
-      color: #ccc;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-    }
-    .expand-tag {
-      border: 1px solid #555;
-      padding: 1px 6px;
-      border-radius: 2px;
-      font-size: 0.72rem;
-    }
-
-    .ranked-wrap {
-      flex: 0 0 auto;
-      position: relative;
-      display: flex;
-      align-items: flex-end;
-      margin-left: 20px;
-    }
-    .ranked-wrap:first-child { margin-left: 0; }
-
-    .rank-number {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: 160px;
-      line-height: 1;
-      color: transparent;
-      -webkit-text-stroke: 6px #444;
-      position: absolute;
-      left: -55px;
-      bottom: -10px;
-      z-index: 0;
-      user-select: none;
-      letter-spacing: -5px;
-      filter: drop-shadow(2px 4px 0px #000) drop-shadow(4px 8px 0px rgba(0,0,0,0.5));
-      text-shadow: none;
-    }
-
-    .ranked-card {
-      position: relative;
-      z-index: 1;
-      width: 140px;
-      border-radius: 4px;
-      overflow: hidden;
-      cursor: pointer;
-      background: var(--card-bg);
-    }
-    .ranked-card img {
-      width: 100%;
-      aspect-ratio: 2/3;
-      object-fit: cover;
-      display: block;
-    }
-
-    .ranked-hover-expand {
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%) scale(0.85);
-      width: 300px;
-      background: #181818;
-      border-radius: 8px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.9);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.25s ease, transform 0.25s ease;
-      z-index: 200;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    .ranked-wrap:hover .ranked-hover-expand {
-      opacity: 1;
-      transform: translateX(-50%) scale(1);
-      pointer-events: auto;
-    }
-    .ranked-wrap:hover .rank-number { color: transparent; -webkit-text-stroke: 6px #666; }
-
-    .skeleton-card {
-      flex: 0 0 auto;
-      width: 180px;
-      aspect-ratio: 2/3;
-      background: #2a2a2a;
-      border-radius: 4px;
-      animation: shimmer 1.5s infinite;
-    }
-    @keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:1} }
-
-    #modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-    #modal.active { display: flex; }
-    #modalContent {
-      width: 100%;
-      max-width: 900px;
-      background: #181818;
-      border-radius: 8px;
-      overflow: hidden;
-      position: relative;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    #modalHeader {
-      position: relative;
-      height: 300px;
-      overflow: hidden;
-      background: #000;
-    }
-    #modalHeaderBg { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
-    #modalHeaderGrad {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, #181818 0%, transparent 50%);
-    }
-    #modalHeaderTitle {
-      position: absolute;
-      bottom: 20px; left: 24px;
-      font-size: 1.8rem; font-weight: 700;
-    }
-    #modalClose {
-      position: absolute; top: 12px; right: 12px;
-      width: 36px; height: 36px;
-      background: #181818; border: none; border-radius: 50%;
-      color: #fff; font-size: 1rem; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s;
-    }
-    #modalClose:hover { background: #333; }
-    #modalBody { padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 16px; }
-    #modalRating {
-      display: inline-block;
-      border: 1px solid rgba(255,255,255,0.4);
-      padding: 3px 10px; font-size: 0.8rem; color: rgba(255,255,255,0.7);
-    }
-    .modal-controls { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    .modal-controls select {
-      background: #333; color: #fff; border: none;
-      padding: 10px 16px; border-radius: 4px;
-      font-size: 0.9rem; font-family: 'Inter', sans-serif; cursor: pointer; outline: none;
-    }
-    .modal-controls select:hover { background: #444; }
-    #iframeWrap { width: 100%; height: 400px; background: #000; border-radius: 4px; overflow: hidden; }
-    #modalIframe { width: 100%; height: 100%; border: none; }
-
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: #141414; }
-    ::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
-
-    @media (max-width: 768px) {
-      #navbar { padding: 0 20px; }
-      .nav-links { display: none; }
-      #hero { padding: 0 20px 60px; height: 65vh; }
-      .hero-title { font-size: 2rem; }
-      .row { padding: 0 20px; }
-      .thumb-card { width: 130px; }
-    }
+    ::-webkit-scrollbar{width:6px;}
+    ::-webkit-scrollbar-track{background:#141414;}
+    ::-webkit-scrollbar-thumb{background:#444;border-radius:3px;}
+    @media(max-width:768px){#navbar{padding:0 20px;}.nav-links{display:none;}#hero{padding:0 20px 60px;height:65vh;}.hero-title{font-size:2rem;}.row{padding:0 20px;}#searchResults{padding:80px 20px 40px;}}
   </style>
 </head>
 <body>
@@ -596,9 +161,7 @@
   <h1 class="profile-title">Who's watching?</h1>
   <div class="profiles-grid">
     <div class="profile-item" onclick="selectProfile()">
-      <div class="profile-avatar">
-        <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA4aADAAQAAAABAAAA4QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA4QDhAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAQEBAQEBAgEBAgMCAgIDBAMDAwMEBgQEBAQEBgcGBgYGBgYHBwcHBwcHBwgICAgICAkJCQkJCwsLCwsLCwsLC//bAEMBAgICAwMDBQMDBQsIBggLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLC//dAAQAD//aAAwDAQACEQMRAD8A/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Q/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//R/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//S/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//T/G+iiiv5rP8AfwKKKKACiivof4A/sl/tJ/tS6pNpP7P/AIM1LxO1sds81tGFtoWOCFkuJCkKMQchWcEjoDVQhKclGCu30WrOLMMxwmAw8sVjq0aVKO8pyUYr1lJpL5s+eKK/SX4j/wDBIX/go38LPD8vijxN8L9QuLKCMyStps9tqMiKOuYraWSXgcnCEY71+bjo8TtFKpVlJBBGCCOoIq6tCrSfLVg4vs00/wAThyTibKM5pyq5RjKWIjHRulUjNJ9m4t2+Y2iiisj2wooooAKKKKACiiigAooooAKKKKACiiigAor6X/Z7/Y4/ah/asnuI/wBnzwTqXiaK0cxT3MCLFaRSABtj3EzJCr4IO0uGwc4xXvnxZ/4JN/8ABQ34LeHJvF3jb4Y6lJptuu+WbTZINSMa9y0dpJLIFXqzFNoHJOK3jha8oe1jTk490m199rHzGM424dwmNWW4rMqEMQ9PZyq04zu9lyuSld9NNT87KKAc8iisD6cKKKKACiiigD//1Pxvooor+az/AH8CiiigD69/YR/ZU1T9tH9qTwx8ALOeSys9TlefU7uIAvb2Fspkndd2RvKjYmQRvZcgiv8AR++D/wAG/hn8A/h3pnwo+EOj2+haBpEQitrS2QKo/vMx6vI5yzyMSzsSzEkk1/Er/wAG8Xirw/4d/wCChP8AZetSpHca54Y1KxsQ5wXuFeC4Kr7+VBIfoDX929fqvAOEorC1MTa83Jxv2SSdvxu++nY/zL+mbxLmVbijD5JUm1haVKNSMekpzck5vu0lyL+W0rfFIRl3DBr+WL/g4L/4J+eBoPh837cnwv0+HTNUsLqC28UJCPLS8hunWGG5KqMeckrJG7cF1cEnKDP9T1fmH/wWU8X+HvB//BNr4nz+IShF/YwWFvG3V7i6uIkj2juVJ3+wUntX0PE2Eo18urOqvhi5J9mldfft57H4d4I8SZlk3G2VVstk71K1OlOK2nCpNRlFrZ6O6vtJKW6P87Oiiivwk/2l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" alt="ClassroomSpot OS User">
-      </div>
+      <div class="profile-avatar"><img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA4aADAAQAAAABAAAA4QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA4QDhAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAQEBAQEBAgEBAgMCAgIDBAMDAwMEBgQEBAQEBgcGBgYGBgYHBwcHBwcHBwgICAgICAkJCQkJCwsLCwsLCwsLC//bAEMBAgICAwMDBQMDBQsIBggLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLC//dAAQAD//aAAwDAQACEQMRAD8A/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Q/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//R/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//S/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//T/G+iiiv5rP8AfwKKKKACiivof4A/sl/tJ/tS6pNpP7P/AIM1LxO1sds81tGFtoWOCFkuJCkKMQchWcEjoDVQhKclGCu30WrOLMMxwmAw8sVjq0aVKO8pyUYr1lJpL5s+eKK/SX4j/wDBIX/go38LPD8vijxN8L9QuLKCMyStps9tqMiKOuYraWSXgcnCEY71+bjo8TtFKpVlJBBGCCOoIq6tCrSfLVg4vs00/wAThyTibKM5pyq5RjKWIjHRulUjNJ9m4t2+Y2iiisj2wooooAKKKKACiiigAooooAKKKKACiiigAor6X/Z7/Y4/ah/asnuI/wBnzwTqXiaK0cxT3MCLFaRSABtj3EzJCr4IO0uGwc4xXvnxZ/4JN/8ABQ34LeHJvF3jb4Y6lJptuu+WbTZINSMa9y0dpJLIFXqzFNoHJOK3jha8oe1jTk490m199rHzGM424dwmNWW4rMqEMQ9PZyq04zu9lyuSld9NNT87KKAc8iisD6cKKKKACiiigD//1Pxvooor+az/AH8CiiigD69/YR/ZU1T9tH9qTwx8ALOeSys9TlefU7uIAvb2Fspkndd2RvKjYmQRvZcgiv8AR++D/wAG/hn8A/h3pnwo+EOj2+haBpEQitrS2QKo/vMx6vI5yzyMSzsSzEkk1/Er/wAG8Xirw/4d/wCChP8AZetSpHca54Y1KxsQ5wXuFeC4Kr7+VBIfoDX929fqvAOEorC1MTa83Jxv2SSdvxu++nY/zL+mbxLmVbijD5JUm1haVKNSMekpzck5vu0lyL+W0rfFIRl3DBr+WL/g4L/4J+eBoPh837cnwv0+HTNUsLqC28UJCPLS8hunWGG5KqMeckrJG7cF1cEnKDP9T1fmH/wWU8X+HvB//BNr4nz+IShF/YwWFvG3V7i6uIkj2juVJ3+wUntX0PE2Eo18urOqvhi5J9mldfft57H4d4I8SZlk3G2VVstk71K1OlOK2nCpNRlFrZ6O6vtJKW6P87Oiiivwk/2l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" alt="Profile"></div>
       <div class="profile-name">ClassroomSpot OS User</div>
     </div>
   </div>
@@ -621,31 +184,32 @@
       </button>
       <input id="navSearch" placeholder="Titles, people, genres" autocomplete="off"/>
     </div>
-    <div class="nav-pfp">
-      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA4aADAAQAAAABAAAA4QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA4QDhAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAQEBAQEBAgEBAgMCAgIDBAMDAwMEBgQEBAQEBgcGBgYGBgYHBwcHBwcHBwgICAgICAkJCQkJCwsLCwsLCwsLC//bAEMBAgICAwMDBQMDBQsIBggLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLC//dAAQAD//aAAwDAQACEQMRAD8A/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Q/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//R/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//S/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//T/G+iiiv5rP8AfwKKKKACiivof4A/sl/tJ/tS6pNpP7P/AIM1LxO1sds81tGFtoWOCFkuJCkKMQchWcEjoDVQhKclGCu30WrOLMMxwmAw8sVjq0aVKO8pyUYr1lJpL5s+eKK/SX4j/wDBIX/go38LPD8vijxN8L9QuLKCMyStps9tqMiKOuYraWSXgcnCEY71+bjo8TtFKpVlJBBGCCOoIq6tCrSfLVg4vs00/wAThyTibKM5pyq5RjKWIjHRulUjNJ9m4t2+Y2iiisj2wooooAKKKKACiiigAooooAKKKKACiiigAor6X/Z7/Y4/ah/asnuI/wBnzwTqXiaK0cxT3MCLFaRSABtj3EzJCr4IO0uGwc4xXvnxZ/4JN/8ABQ34LeHJvF3jb4Y6lJptuu+WbTZINSMa9y0dpJLIFXqzFNoHJOK3jha8oe1jTk490m199rHzGM424dwmNWW4rMqEMQ9PZyq04zu9lyuSld9NNT87KKAc8iisD6cKKKKACiiigD//1Pxvooor+az/AH8CiiigD69/YR/ZU1T9tH9qTwx8ALOeSys9TlefU7uIAvb2Fspkndd2RvKjYmQRvZcgiv8AR++D/wAG/hn8A/h3pnwo+EOj2+haBpEQitrS2QKo/vMx6vI5yzyMSzsSzEkk1/Er/wAG8Xirw/4d/wCChP8AZetSpHca54Y1KxsQ5wXuFeC4Kr7+VBIfoDX929fqvAOEorC1MTa83Jxv2SSdvxu++nY/zL+mbxLmVbijD5JUm1haVKNSMekpzck5vu0lyL+W0rfFIRl3DBr+WL/g4L/4J+eBoPh837cnwv0+HTNUsLqC28UJCPLS8hunWGG5KqMeckrJG7cF1cEnKDP9T1fmH/wWU8X+HvB//BNr4nz+IShF/YwWFvG3V7i6uIkj2juVJ3+wUntX0PE2Eo18urOqvhi5J9mldfft57H4d4I8SZlk3G2VVstk71K1OlOK2nCpNRlFrZ6O6vtJKW6P87Oiiivwk/2l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" alt="Profile">
-    </div>
+    <div class="nav-pfp"><img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA4aADAAQAAAABAAAA4QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA4QDhAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAQEBAQEBAgEBAgMCAgIDBAMDAwMEBgQEBAQEBgcGBgYGBgYHBwcHBwcHBwgICAgICAkJCQkJCwsLCwsLCwsLC//bAEMBAgICAwMDBQMDBQsIBggLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLC//dAAQAD//aAAwDAQACEQMRAD8A/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//Q/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//R/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//S/G+iiiv5rP8AfwKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigD//T/G+iiiv5rP8AfwKKKKACiivof4A/sl/tJ/tS6pNpP7P/AIM1LxO1sds81tGFtoWOCFkuJCkKMQchWcEjoDVQhKclGCu30WrOLMMxwmAw8sVjq0aVKO8pyUYr1lJpL5s+eKK/SX4j/wDBIX/go38LPD8vijxN8L9QuLKCMyStps9tqMiKOuYraWSXgcnCEY71+bjo8TtFKpVlJBBGCCOoIq6tCrSfLVg4vs00/wAThyTibKM5pyq5RjKWIjHRulUjNJ9m4t2+Y2iiisj2wooooAKKKKACiiigAooooAKKKKACiiigAor6X/Z7/Y4/ah/asnuI/wBnzwTqXiaK0cxT3MCLFaRSABtj3EzJCr4IO0uGwc4xXvnxZ/4JN/8ABQ34LeHJvF3jb4Y6lJptuu+WbTZINSMa9y0dpJLIFXqzFNoHJOK3jha8oe1jTk490m199rHzGM424dwmNWW4rMqEMQ9PZyq04zu9lyuSld9NNT87KKAc8iisD6cKKKKACiiigD//1Pxvooor+az/AH8CiiigD69/YR/ZU1T9tH9qTwx8ALOeSys9TlefU7uIAvb2Fspkndd2RvKjYmQRvZcgiv8AR++D/wAG/hn8A/h3pnwo+EOj2+haBpEQitrS2QKo/vMx6vI5yzyMSzsSzEkk1/Er/wAG8Xirw/4d/wCChP8AZetSpHca54Y1KxsQ5wXuFeC4Kr7+VBIfoDX929fqvAOEorC1MTa83Jxv2SSdvxu++nY/zL+mbxLmVbijD5JUm1haVKNSMekpzck5vu0lyL+W0rfFIRl3DBr+WL/g4L/4J+eBoPh837cnwv0+HTNUsLqC28UJCPLS8hunWGG5KqMeckrJG7cF1cEnKDP9T1fmH/wWU8X+HvB//BNr4nz+IShF/YwWFvG3V7i6uIkj2juVJ3+wUntX0PE2Eo18urOqvhi5J9mldfft57H4d4I8SZlk3G2VVstk71K1OlOK2nCpNRlFrZ6O6vtJKW6P87Oiiivwk/2l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" alt="Profile"></div>
   </div>
 </nav>
 
 <section id="hero">
   <div id="heroBg"></div>
   <div class="hero-content">
-    <div class="hero-badge" id="heroBadge">Featured</div>
+    <div class="hero-badge">Featured</div>
     <h1 class="hero-title" id="heroTitle">Loading...</h1>
     <div class="hero-meta" id="heroMeta"></div>
     <p class="hero-overview" id="heroOverview"></p>
     <div class="hero-buttons">
       <button class="btn-play" id="heroPlayBtn">
-        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        Play
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Play
       </button>
       <button class="btn-info" id="heroInfoBtn">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-        More Info
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>More Info
       </button>
     </div>
   </div>
 </section>
+
+<div id="searchResults">
+  <div class="row-title" id="searchLabel">Search Results</div>
+  <div id="searchGrid"></div>
+</div>
 
 <div id="content">
   <div class="row">
@@ -681,14 +245,15 @@
     <div id="modalBody">
       <div style="display:flex;align-items:center;gap:12px;">
         <span id="modalRating">NR</span>
-        <span id="modalYear" style="color:rgba(255,255,255,0.7);font-size:0.9rem;"></span>
+        <span id="modalYear" style="color:rgba(255,255,255,.7);font-size:.9rem;"></span>
       </div>
       <div class="modal-controls">
         <select id="seasonSelect" style="display:none;"></select>
         <select id="episodeSelect" style="display:none;"></select>
         <select id="sourceSelect"></select>
+        <button class="modal-watch-btn" id="modalWatchBtn" onclick="startWatching()">Watch Now</button>
       </div>
-      <div id="iframeWrap">
+      <div id="iframeWrap" style="display:none;">
         <iframe id="modalIframe" allowfullscreen></iframe>
       </div>
     </div>
@@ -700,7 +265,8 @@ const API_KEY = '3a73619bbb8fc6d47742d1b5b2b707b5';
 const BASE = 'https://api.themoviedb.org/3';
 const IMG = 'https://image.tmdb.org/t/p/';
 const trailerCache = {};
-let hoverTimers = {};
+let currentModalItem = null;
+let currentModalType = null;
 
 function startIntro() {
   setTimeout(() => {
@@ -724,28 +290,49 @@ window.addEventListener('scroll', () => {
 });
 
 let searchOpen = false;
+let searchTimeout = null;
+
 function toggleSearch() {
   searchOpen = !searchOpen;
   const inp = document.getElementById('navSearch');
   inp.classList.toggle('open', searchOpen);
-  if (searchOpen) { inp.focus(); }
-  else { inp.value = ''; performSearch(''); }
+  if (searchOpen) {
+    inp.focus();
+  } else {
+    inp.value = '';
+    showHome();
+  }
 }
 
 document.getElementById('navSearch').addEventListener('keydown', e => {
   if (e.key === 'Escape') toggleSearch();
 });
 
-let searchTimeout = null;
 document.getElementById('navSearch').addEventListener('input', e => {
   clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => performSearch(e.target.value.trim()), 400);
+  const q = e.target.value.trim();
+  searchTimeout = setTimeout(() => {
+    if (!q) { showHome(); return; }
+    performSearch(q);
+  }, 400);
 });
+
+function showHome() {
+  document.getElementById('hero').style.display = '';
+  document.getElementById('content').style.display = 'block';
+  document.getElementById('searchResults').style.display = 'none';
+}
+
+function showSearchView() {
+  document.getElementById('hero').style.display = 'none';
+  document.getElementById('content').style.display = 'none';
+  document.getElementById('searchResults').style.display = 'block';
+}
 
 async function tmdb(path) {
   const sep = path.includes('?') ? '&' : '?';
-  const res = await fetch(`${BASE}${path}${sep}api_key=${API_KEY}&language=en-US`);
-  return res.json();
+  const r = await fetch(`${BASE}${path}${sep}api_key=${API_KEY}&language=en-US`);
+  return r.json();
 }
 
 async function getCert(id, type) {
@@ -763,144 +350,237 @@ async function getCert(id, type) {
 }
 
 async function getTrailerKey(id, type) {
-  const cacheKey = `${type}-${id}`;
-  if (trailerCache[cacheKey] !== undefined) return trailerCache[cacheKey];
+  const key = `${type}-${id}`;
+  if (trailerCache[key] !== undefined) return trailerCache[key];
   try {
     const d = await tmdb(`/${type}/${id}/videos`);
     const v = (d.results || []).find(x => x.type === 'Trailer' && x.site === 'YouTube')
+           || (d.results || []).find(x => x.type === 'Teaser' && x.site === 'YouTube')
            || (d.results || []).find(x => x.site === 'YouTube')
            || null;
-    trailerCache[cacheKey] = v?.key || null;
-    return trailerCache[cacheKey];
-  } catch { trailerCache[cacheKey] = null; return null; }
+    trailerCache[key] = v?.key || null;
+    return trailerCache[key];
+  } catch { trailerCache[key] = null; return null; }
 }
 
-function buildExpandHTML(item, type) {
-  const title = item.title || item.name || 'Untitled';
-  const poster = item.poster_path ? `${IMG}w500${item.poster_path}` : '';
-  const score = Math.round(item.vote_average * 10);
-  return `
-    <div class="trailer-frame" id="tf-${type}-${item.id}">
-      ${poster ? `<img class="trailer-thumb" src="${poster}" alt="">` : ''}
-      <div class="trailer-loading">Loading trailer...</div>
-    </div>
-    <div class="expand-info">
-      <div class="expand-title">${title}</div>
-      <div class="expand-btns">
-        <button class="expand-btn-play" onclick="openModal(${JSON.stringify(item).replace(/"/g,'&quot;')}, '${type}')">
-          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        </button>
-        <button class="expand-btn-add" title="Add to list">+</button>
-        <span style="margin-left:auto;" class="expand-match">${score}% Match</span>
-      </div>
-      <div class="expand-tags">
-        <span class="expand-tag">${(item.release_date||item.first_air_date||'').slice(0,4)}</span>
-        <span class="expand-tag">${type === 'tv' ? 'Series' : 'Movie'}</span>
-      </div>
-    </div>
-  `;
-}
-
-async function loadTrailerIntoFrame(item, type) {
-  const frameId = `tf-${type}-${item.id}`;
-  const frame = document.getElementById(frameId);
-  if (!frame) return;
+async function injectTrailer(containerId, item, type) {
+  const zone = document.getElementById(containerId);
+  if (!zone) return;
+  const loader = zone.querySelector('.t-loader');
   const key = await getTrailerKey(item.id, type);
+  if (!zone.isConnected) return;
   if (!key) {
-    const loading = frame.querySelector('.trailer-loading');
-    if (loading) loading.textContent = 'No trailer available';
+    if (loader) loader.textContent = 'No trailer found';
     return;
   }
-  const thumb = frame.querySelector('.trailer-thumb');
-  const loading = frame.querySelector('.trailer-loading');
-  if (thumb) thumb.style.display = 'none';
-  if (loading) loading.style.display = 'none';
+  const thumb = zone.querySelector('.t-thumb');
+  if (thumb) thumb.remove();
+  if (loader) loader.remove();
   const iframe = document.createElement('iframe');
-  iframe.src = `https://www.youtube.com/embed/${key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${key}&modestbranding=1&rel=0`;
-  iframe.allow = 'autoplay; encrypted-media';
-  iframe.allowFullscreen = true;
-  frame.appendChild(iframe);
+  iframe.src = `https://www.youtube-nocookie.com/embed/${key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${key}&modestbranding=1&rel=0&iv_load_policy=3`;
+  iframe.allow = 'autoplay;encrypted-media';
+  zone.appendChild(iframe);
 }
 
-function createThumbCard(item, type) {
+function clearTrailer(containerId) {
+  const zone = document.getElementById(containerId);
+  if (!zone) return;
+  const iframe = zone.querySelector('iframe');
+  if (iframe) iframe.remove();
+  if (!zone.querySelector('.t-loader')) {
+    const l = document.createElement('div');
+    l.className = 't-loader';
+    l.textContent = 'Loading trailer...';
+    zone.appendChild(l);
+  }
+}
+
+function buildHoverExpand(item, type, uid) {
+  const title = item.title || item.name || 'Untitled';
+  const poster = item.poster_path ? `${IMG}w500${item.poster_path}` : '';
+  const score = Math.round((item.vote_average || 0) * 10);
+  const year = (item.release_date || item.first_air_date || '').slice(0, 4);
+
+  const div = document.createElement('div');
+  div.className = 'hover-expand';
+
+  div.innerHTML = `
+    <div class="trailer-zone" id="${uid}">
+      ${poster ? `<img class="t-thumb" src="${poster}" alt="">` : ''}
+      <div class="t-loader">Loading trailer...</div>
+    </div>
+    <div class="expand-body">
+      <div class="expand-title">${title}</div>
+      <div class="expand-btns">
+        <button class="exp-btn-play" data-open="true">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <button class="exp-btn-add">+</button>
+        <span class="exp-match">${score}% Match</span>
+      </div>
+      <div class="exp-selects" id="sel-${uid}">
+        ${type === 'tv' ? `
+          <select id="exp-season-${uid}"><option>Loading seasons...</option></select>
+          <select id="exp-ep-${uid}"><option>Loading episodes...</option></select>
+        ` : `
+          <select id="exp-src-${uid}"></select>
+        `}
+      </div>
+      <button class="exp-watch-btn" id="exp-watch-${uid}">Watch Now</button>
+    </div>
+  `;
+
+  div.querySelector('.exp-btn-play').addEventListener('click', e => {
+    e.stopPropagation();
+    if (type === 'tv') {
+      const sn = div.querySelector(`#exp-season-${uid}`)?.value;
+      const ep = div.querySelector(`#exp-ep-${uid}`)?.value;
+      const src = div.querySelector(`#exp-src-${uid}`)?.value;
+      openModal(item, type, sn, ep, src);
+    } else {
+      const src = div.querySelector(`#exp-src-${uid}`)?.value;
+      openModal(item, type, null, null, src);
+    }
+  });
+
+  div.querySelector(`#exp-watch-${uid}`).addEventListener('click', e => {
+    e.stopPropagation();
+    if (type === 'tv') {
+      const sn = div.querySelector(`#exp-season-${uid}`)?.value;
+      const ep = div.querySelector(`#exp-ep-${uid}`)?.value;
+      const src = div.querySelector(`#exp-src-${uid}`)?.value;
+      openModal(item, type, sn, ep, src);
+    } else {
+      const src = div.querySelector(`#exp-src-${uid}`)?.value;
+      openModal(item, type, null, null, src);
+    }
+  });
+
+  return div;
+}
+
+const tvSrcs = [
+  'https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}',
+  'https://player.vidsrc.co/embed/tv/${id}/${s}/${e}',
+  'https://vidsrc.icu/embed/tv/${id}/${s}/${e}',
+  'https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}',
+  'https://vidlink.pro/tv/${id}/${s}/${e}',
+  'https://embed.su/embed/tv/${id}/${s}/${e}'
+];
+const mvSrcs = [
+  'https://vidsrc.xyz/embed/movie?tmdb=${id}',
+  'https://player.vidsrc.co/embed/movie/${id}',
+  'https://vidsrc.icu/embed/movie/${id}',
+  'https://vidsrc.cc/v2/embed/movie/${id}',
+  'https://vidlink.pro/movie/${id}',
+  'https://embed.su/embed/movie/${id}'
+];
+
+function fillMovieSources(selectEl, id) {
+  selectEl.innerHTML = '';
+  mvSrcs.forEach(s => {
+    const url = s.replace('${id}', id);
+    const o = document.createElement('option');
+    o.value = url;
+    try { o.textContent = new URL(url).hostname.replace('www.', ''); } catch { o.textContent = 'Source'; }
+    selectEl.appendChild(o);
+  });
+}
+
+function fillTvSources(selectEl, id, season, episode) {
+  selectEl.innerHTML = '';
+  tvSrcs.forEach(s => {
+    const url = s.replace('${id}', id).replace('${s}', season).replace('${e}', episode);
+    const o = document.createElement('option');
+    o.value = url;
+    try { o.textContent = new URL(url).hostname.replace('www.', ''); } catch { o.textContent = 'Source'; }
+    selectEl.appendChild(o);
+  });
+}
+
+async function setupExpandSelects(item, type, uid) {
+  if (type === 'tv') {
+    const seasonSel = document.getElementById(`exp-season-${uid}`);
+    const epSel = document.getElementById(`exp-ep-${uid}`);
+    const srcSel = document.getElementById(`exp-src-${uid}`) || (() => {
+      const el = document.createElement('select');
+      el.id = `exp-src-${uid}`;
+      document.getElementById(`sel-${uid}`).appendChild(el);
+      return el;
+    })();
+
+    const data = await tmdb(`/tv/${item.id}`);
+    const seasons = (data.seasons || []).filter(s => s.season_number > 0);
+    seasonSel.innerHTML = seasons.map(s => `<option value="${s.season_number}">${s.name || 'Season ' + s.season_number}</option>`).join('');
+
+    const loadEpsForExpand = async (sn) => {
+      const ed = await tmdb(`/tv/${item.id}/season/${sn}`);
+      const eps = ed.episodes || [];
+      epSel.innerHTML = eps.map(e => `<option value="${e.episode_number}">Ep ${e.episode_number}: ${e.name}</option>`).join('');
+      fillTvSources(srcSel, item.id, sn, eps[0]?.episode_number || 1);
+    };
+
+    seasonSel.addEventListener('change', () => loadEpsForExpand(seasonSel.value));
+    epSel.addEventListener('change', () => fillTvSources(srcSel, item.id, seasonSel.value, epSel.value));
+    await loadEpsForExpand(seasons[0]?.season_number || 1);
+  } else {
+    const srcSel = document.getElementById(`exp-src-${uid}`);
+    if (srcSel) fillMovieSources(srcSel, item.id);
+  }
+}
+
+let uidCounter = 0;
+
+function createCard(item, type, ranked, rank) {
+  const uid = `card-${++uidCounter}`;
   const wrap = document.createElement('div');
-  wrap.className = 'thumb-wrap';
+  wrap.className = ranked ? 'ranked-wrap' : 'thumb-wrap';
 
-  const card = document.createElement('div');
-  card.className = 'thumb-card';
+  if (ranked) {
+    const num = document.createElement('div');
+    num.className = 'rank-number';
+    num.textContent = rank;
+    wrap.appendChild(num);
+  }
+
+  const inner = document.createElement('div');
+  inner.className = ranked ? 'ranked-card' : 'thumb-card';
   const poster = item.poster_path ? `${IMG}w300${item.poster_path}` : 'https://via.placeholder.com/300x450/2F2F2F/888?text=No+Image';
-  card.innerHTML = `<img src="${poster}" alt="${item.title||item.name||''}" loading="lazy">`;
-  card.onclick = () => openModal(item, type);
+  inner.innerHTML = `<img src="${poster}" alt="${(item.title||item.name||'').replace(/"/g,'')}" loading="lazy">`;
+  inner.onclick = () => openModal(item, type);
 
-  const expand = document.createElement('div');
-  expand.className = 'hover-expand';
-  expand.innerHTML = buildExpandHTML(item, type);
-
-  wrap.appendChild(card);
+  const expand = buildHoverExpand(item, type, uid);
+  wrap.appendChild(inner);
   wrap.appendChild(expand);
 
   let hoverTimer = null;
+  let selectsLoaded = false;
+
   wrap.addEventListener('mouseenter', () => {
-    hoverTimer = setTimeout(() => loadTrailerIntoFrame(item, type), 800);
+    hoverTimer = setTimeout(() => {
+      injectTrailer(uid, item, type);
+      if (!selectsLoaded) {
+        selectsLoaded = true;
+        setupExpandSelects(item, type, uid);
+      }
+    }, 700);
   });
+
   wrap.addEventListener('mouseleave', () => {
     clearTimeout(hoverTimer);
-    const frameId = `tf-${type}-${item.id}`;
-    const frame = document.getElementById(frameId);
-    if (frame) {
-      const iframe = frame.querySelector('iframe');
-      if (iframe) iframe.remove();
-      const thumb = frame.querySelector('.trailer-thumb');
-      const loading = frame.querySelector('.trailer-loading');
-      if (thumb) thumb.style.display = '';
-      if (loading) { loading.style.display = ''; loading.textContent = 'Loading trailer...'; }
-    }
+    clearTrailer(uid);
   });
 
   return wrap;
 }
 
-function createRankedCard(item, type, rank) {
-  const wrap = document.createElement('div');
-  wrap.className = 'ranked-wrap';
-
-  const numEl = document.createElement('div');
-  numEl.className = 'rank-number';
-  numEl.textContent = rank;
-
-  const card = document.createElement('div');
-  card.className = 'ranked-card';
+function createSearchCard(item, type) {
+  const div = document.createElement('div');
+  div.style.cssText = 'cursor:pointer;border-radius:4px;overflow:hidden;background:#2a2a2a;';
   const poster = item.poster_path ? `${IMG}w300${item.poster_path}` : 'https://via.placeholder.com/300x450/2F2F2F/888?text=No+Image';
-  card.innerHTML = `<img src="${poster}" alt="${item.title||item.name||''}" loading="lazy">`;
-  card.onclick = () => openModal(item, type);
-
-  const expand = document.createElement('div');
-  expand.className = 'ranked-hover-expand';
-  expand.innerHTML = buildExpandHTML(item, type);
-
-  wrap.appendChild(numEl);
-  wrap.appendChild(card);
-  wrap.appendChild(expand);
-
-  let hoverTimer = null;
-  wrap.addEventListener('mouseenter', () => {
-    hoverTimer = setTimeout(() => loadTrailerIntoFrame(item, type), 800);
-  });
-  wrap.addEventListener('mouseleave', () => {
-    clearTimeout(hoverTimer);
-    const frameId = `tf-${type}-${item.id}`;
-    const frame = document.getElementById(frameId);
-    if (frame) {
-      const iframe = frame.querySelector('iframe');
-      if (iframe) iframe.remove();
-      const thumb = frame.querySelector('.trailer-thumb');
-      const loading = frame.querySelector('.trailer-loading');
-      if (thumb) thumb.style.display = '';
-      if (loading) { loading.style.display = ''; loading.textContent = 'Loading trailer...'; }
-    }
-  });
-
-  return wrap;
+  div.innerHTML = `<img src="${poster}" alt="" style="width:100%;aspect-ratio:2/3;object-fit:cover;display:block;">`;
+  div.onclick = () => openModal(item, type);
+  return div;
 }
 
 async function loadHero() {
@@ -915,7 +595,7 @@ async function loadHero() {
   document.getElementById('heroTitle').textContent = item.title || item.name || '';
   document.getElementById('heroOverview').textContent = item.overview || '';
   document.getElementById('heroMeta').innerHTML = `
-    <span style="color:#46d369;font-weight:600;">${Math.round(item.vote_average*10)}% Match</span>
+    <span style="color:#46d369;font-weight:600;">${Math.round((item.vote_average||0)*10)}% Match</span>
     <span>${year}</span>
     <span class="hero-rating-badge">${cert}</span>
     <span>${type === 'tv' ? 'TV Series' : 'Movie'}</span>
@@ -924,24 +604,18 @@ async function loadHero() {
   document.getElementById('heroInfoBtn').onclick = () => openModal(item, type);
 }
 
-function makeSkeletons(track, count = 12) {
-  track.innerHTML = '';
+function skeletons(trackId, count) {
+  const t = document.getElementById(trackId);
+  t.innerHTML = '';
   for (let i = 0; i < count; i++) {
     const s = document.createElement('div');
     s.className = 'skeleton-card';
-    track.appendChild(s);
+    t.appendChild(s);
   }
 }
 
 async function loadAllRows() {
-  const tracks = {
-    trackRanked: document.getElementById('trackRanked'),
-    trackToday: document.getElementById('trackToday'),
-    trackMovies: document.getElementById('trackMovies'),
-    trackKids: document.getElementById('trackKids'),
-    trackTV: document.getElementById('trackTV'),
-  };
-  Object.values(tracks).forEach(t => makeSkeletons(t));
+  ['trackRanked','trackToday','trackMovies','trackKids','trackTV'].forEach(id => skeletons(id, 12));
 
   const [popular, trending, movies, kids, tv] = await Promise.all([
     tmdb('/trending/all/week?page=1'),
@@ -951,129 +625,117 @@ async function loadAllRows() {
     tmdb('/tv/popular?page=1'),
   ]);
 
-  tracks.trackRanked.innerHTML = '';
+  const ranked = document.getElementById('trackRanked');
+  ranked.innerHTML = '';
   (popular.results || []).slice(0, 10).forEach((item, i) => {
     const t = item.media_type || (item.first_air_date ? 'tv' : 'movie');
-    tracks.trackRanked.appendChild(createRankedCard(item, t, i + 1));
+    ranked.appendChild(createCard(item, t, true, i + 1));
   });
 
-  tracks.trackToday.innerHTML = '';
+  const today = document.getElementById('trackToday');
+  today.innerHTML = '';
   (trending.results || []).slice(0, 18).forEach(item => {
     const t = item.media_type || (item.first_air_date ? 'tv' : 'movie');
-    tracks.trackToday.appendChild(createThumbCard(item, t));
+    today.appendChild(createCard(item, t, false));
   });
 
-  tracks.trackMovies.innerHTML = '';
-  (movies.results || []).slice(0, 18).forEach(item => tracks.trackMovies.appendChild(createThumbCard(item, 'movie')));
+  const moviesTrack = document.getElementById('trackMovies');
+  moviesTrack.innerHTML = '';
+  (movies.results || []).slice(0, 18).forEach(item => moviesTrack.appendChild(createCard(item, 'movie', false)));
 
-  tracks.trackKids.innerHTML = '';
-  (kids.results || []).slice(0, 18).forEach(item => tracks.trackKids.appendChild(createThumbCard(item, 'movie')));
+  const kidsTrack = document.getElementById('trackKids');
+  kidsTrack.innerHTML = '';
+  (kids.results || []).slice(0, 18).forEach(item => kidsTrack.appendChild(createCard(item, 'movie', false)));
 
-  tracks.trackTV.innerHTML = '';
-  (tv.results || []).slice(0, 18).forEach(item => tracks.trackTV.appendChild(createThumbCard(item, 'tv')));
+  const tvTrack = document.getElementById('trackTV');
+  tvTrack.innerHTML = '';
+  (tv.results || []).slice(0, 18).forEach(item => tvTrack.appendChild(createCard(item, 'tv', false)));
 }
 
 async function performSearch(q) {
-  if (!q) { loadAllRows(); loadHero(); return; }
+  showSearchView();
+  document.getElementById('searchLabel').textContent = `Results for "${q}"`;
+  const grid = document.getElementById('searchGrid');
+  grid.innerHTML = '';
   const data = await tmdb(`/search/multi?query=${encodeURIComponent(q)}`);
-  const results = (data.results || []).filter(i => i.media_type !== 'person');
-  const track = document.getElementById('trackToday');
-  track.innerHTML = '';
-  results.forEach(item => {
+  (data.results || []).filter(i => i.media_type !== 'person').forEach(item => {
     const t = item.media_type || (item.first_air_date ? 'tv' : 'movie');
-    track.appendChild(createThumbCard(item, t));
+    grid.appendChild(createSearchCard(item, t));
   });
-  document.querySelector('.row:nth-child(2) .row-title').textContent = `Results for "${q}"`;
 }
 
-const tvSources = [
-  'https://player.vidify.top/embed/tv/${id}/${season}/${episode}',
-  'https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${season}&episode=${episode}',
-  'https://player.vidsrc.co/embed/tv/${id}/${season}/${episode}',
-  'https://vidsrc.icu/embed/tv/${id}/${season}/${episode}',
-  'https://vidsrc.cc/v2/embed/tv/${id}/${season}/${episode}',
-  'https://vidlink.pro/tv/${id}/${season}/${episode}',
-  'https://embed.su/embed/tv/${id}/${season}/${episode}'
-];
-const movieSources = [
-  'https://player.vidify.top/embed/movie/${id}',
-  'https://vidsrc.xyz/embed/movie?tmdb=${id}',
-  'https://player.vidsrc.co/embed/movie/${id}',
-  'https://vidsrc.icu/embed/movie/${id}',
-  'https://vidsrc.cc/v2/embed/movie/${id}',
-  'https://vidlink.pro/movie/${id}',
-  'https://embed.su/embed/movie/${id}'
-];
+async function openModal(item, type, presetSeason, presetEp, presetSrc) {
+  currentModalItem = item;
+  currentModalType = type;
 
-async function openModal(item, type) {
   const modal = document.getElementById('modal');
-  const headerBg = document.getElementById('modalHeaderBg');
-  const headerTitle = document.getElementById('modalHeaderTitle');
-  const modalRating = document.getElementById('modalRating');
-  const modalYear = document.getElementById('modalYear');
-  const sourceSelect = document.getElementById('sourceSelect');
-  const seasonSelect = document.getElementById('seasonSelect');
-  const episodeSelect = document.getElementById('episodeSelect');
-  const modalIframe = document.getElementById('modalIframe');
-
   modal.classList.add('active');
-  headerBg.src = item.backdrop_path ? `${IMG}w1280${item.backdrop_path}` : '';
-  headerTitle.textContent = item.title || item.name || '';
-  modalYear.textContent = (item.release_date || item.first_air_date || '').slice(0, 4);
-  modalIframe.src = '';
-  sourceSelect.innerHTML = '';
-  seasonSelect.style.display = 'none';
-  episodeSelect.style.display = 'none';
 
-  getCert(item.id, type).then(c => { modalRating.textContent = c; });
+  document.getElementById('modalHeaderBg').src = item.backdrop_path ? `${IMG}w1280${item.backdrop_path}` : '';
+  document.getElementById('modalHeaderTitle').textContent = item.title || item.name || '';
+  document.getElementById('modalYear').textContent = (item.release_date || item.first_air_date || '').slice(0, 4);
+
+  const iframeWrap = document.getElementById('iframeWrap');
+  iframeWrap.style.display = 'none';
+  document.getElementById('modalIframe').src = '';
+
+  const seasonSel = document.getElementById('seasonSelect');
+  const episodeSel = document.getElementById('episodeSelect');
+  const sourceSel = document.getElementById('sourceSelect');
+  seasonSel.style.display = 'none';
+  episodeSel.style.display = 'none';
+  sourceSel.innerHTML = '';
+
+  getCert(item.id, type).then(c => { document.getElementById('modalRating').textContent = c; });
 
   if (type === 'tv') {
     const tvData = await tmdb(`/tv/${item.id}`);
     const seasons = (tvData.seasons || []).filter(s => s.season_number > 0);
-    seasonSelect.innerHTML = seasons.map(s => `<option value="${s.season_number}">${s.name || 'Season ' + s.season_number}</option>`).join('');
-    seasonSelect.style.display = 'inline-block';
-    seasonSelect.onchange = () => loadEps(item.id, seasonSelect.value);
-    loadEps(item.id, seasons[0]?.season_number || 1);
+    seasonSel.innerHTML = seasons.map(s => `<option value="${s.season_number}">${s.name || 'Season ' + s.season_number}</option>`).join('');
+    seasonSel.style.display = 'inline-block';
+
+    const loadModalEps = async (sn) => {
+      const ed = await tmdb(`/tv/${item.id}/season/${sn}`);
+      const eps = ed.episodes || [];
+      episodeSel.innerHTML = eps.map(e => `<option value="${e.episode_number}">Ep ${e.episode_number}: ${e.name}</option>`).join('');
+      episodeSel.style.display = 'inline-block';
+      fillTvSources(sourceSel, item.id, sn, eps[0]?.episode_number || 1);
+      episodeSel.onchange = () => fillTvSources(sourceSel, item.id, seasonSel.value, episodeSel.value);
+    };
+
+    seasonSel.onchange = () => loadModalEps(seasonSel.value);
+
+    if (presetSeason) {
+      seasonSel.value = presetSeason;
+      await loadModalEps(presetSeason);
+      if (presetEp) episodeSel.value = presetEp;
+      if (presetSrc) sourceSel.value = presetSrc;
+    } else {
+      await loadModalEps(seasons[0]?.season_number || 1);
+    }
   } else {
-    movieSources.forEach(src => {
-      const url = src.replace('${id}', item.id);
-      const opt = document.createElement('option');
-      opt.value = url;
-      try { opt.textContent = new URL(url).hostname.replace('www.', ''); } catch { opt.textContent = 'Source'; }
-      sourceSelect.appendChild(opt);
-    });
-    modalIframe.src = sourceSelect.value;
+    fillMovieSources(sourceSel, item.id);
+    if (presetSrc) sourceSel.value = presetSrc;
   }
-  sourceSelect.onchange = () => { modalIframe.src = sourceSelect.value; };
+
+  sourceSel.onchange = () => {
+    if (iframeWrap.style.display !== 'none') document.getElementById('modalIframe').src = sourceSel.value;
+  };
 }
 
-async function loadEps(tvId, seasonNum) {
-  const episodeSelect = document.getElementById('episodeSelect');
-  const sourceSelect = document.getElementById('sourceSelect');
-  const data = await tmdb(`/tv/${tvId}/season/${seasonNum}`);
-  const eps = data.episodes || [];
-  episodeSelect.innerHTML = eps.map(e => `<option value="${e.episode_number}">Ep ${e.episode_number}: ${e.name}</option>`).join('');
-  episodeSelect.style.display = 'inline-block';
-  episodeSelect.onchange = () => updateTvSrc(tvId, seasonNum, episodeSelect.value);
-  updateTvSrc(tvId, seasonNum, eps[0]?.episode_number || 1);
-}
-
-function updateTvSrc(id, season, episode) {
-  const sourceSelect = document.getElementById('sourceSelect');
-  sourceSelect.innerHTML = '';
-  tvSources.forEach(src => {
-    const url = src.replace('${id}', id).replace('${season}', season).replace('${episode}', episode);
-    const opt = document.createElement('option');
-    opt.value = url;
-    try { opt.textContent = new URL(url).hostname.replace('www.', ''); } catch { opt.textContent = 'Source'; }
-    sourceSelect.appendChild(opt);
-  });
-  document.getElementById('modalIframe').src = sourceSelect.value;
+function startWatching() {
+  const iframeWrap = document.getElementById('iframeWrap');
+  const iframe = document.getElementById('modalIframe');
+  const sourceSel = document.getElementById('sourceSelect');
+  iframeWrap.style.display = 'block';
+  iframe.src = sourceSel.value;
+  iframeWrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function closeModal() {
   document.getElementById('modal').classList.remove('active');
   document.getElementById('modalIframe').src = '';
+  document.getElementById('iframeWrap').style.display = 'none';
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
